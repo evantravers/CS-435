@@ -1,3 +1,9 @@
+client.c:	// TODO handle gethostbyname
+client.c:	// TODO memcpy thing
+client.c:	// TODO handle the connect
+client.c:	// TODO handle the write
+client.c:	// TODO handle the read
+client.c:	// TODO handle the close
 server.c:// TODO handle the system call error handling
 server.c:	// TODO take care of Socket
 server.c:	// TODO take care of bind

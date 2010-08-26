@@ -8,6 +8,7 @@
 #include <errno.h>
 
 // TODO handle the system call error handling
+// don't forget to use perror()
 
 main() {
 	struct sockaddr_in Server_Address_Passive;
@@ -19,7 +20,7 @@ main() {
 	server_socket=socket(AF_INET,SOCK_STREAM,0);
 	Server_Address_Passive.sin_family=AF_INET;
 	Server_Address_Passive.sin_addr.s_addr=htonl(INADDR_ANY);
-	Server_Address_Passive.sin_port =htons(4096);
+	Server_Address_Passive.sin_port=htons(10214);
 	// TODO take care of bind
 	bind(server_socket, (struct sockaddr *) &Server_Address_Passive, sizeof(struct sockaddr));
 	// TODO take care of listen

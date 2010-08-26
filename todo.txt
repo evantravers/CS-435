@@ -1,0 +1,8 @@
+server.c:// TODO handle the system call error handling
+server.c:	// TODO take care of Socket
+server.c:	// TODO take care of bind
+server.c:	// TODO take care of listen
+server.c:		// TODO take care of accept
+server.c:		// TODO take care of read
+server.c:		// TODO take care of write
+server.c:		// TODO take care of close

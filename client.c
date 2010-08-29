@@ -13,20 +13,42 @@ int main(int argc, char *argv[]) {
 	struct hostent *hp;
 	client_socket = socket(AF_INET, SOCK_STREAM, 0);
 	Remote_Address.sin_family=AF_INET;
-	// TODO handle gethostbyname
 	hp = gethostbyname(argv[1]);
-	// TODO memcpy thing
+	if (hp==NULL) {
+		perror("gethostbyname has failed");
+		exit(-1);
+	}
+	// CHANGED memcpy thing
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
-	Remote_Address.sin_port=htons(10214);
-	// TODO handle the connect
-	connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
-	// TODO handle the write
-	write(client_socket, "ping", 5);
-	// TODO handle the read
-	read(client_socket, buf, 512);
+	Remote_Address.sin_port=htons(10234);
+
+	int e_con = connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
+	if (e_con==-1) {
+		perror("connect has failed");
+		exit(-1);
+	}
+	
+	// FIXED handle the write
+	int e_wri = write(client_socket, "ping", 5);
+	if (e_wri==-1) {
+		perror("write has failed");
+		exit(-1);
+	}
+	
+	// FIXED handle the read
+	int e_rea = read(client_socket, buf, 512);
+	if (e_rea==-1) {
+		perror("the read has failed");
+		exit(-1);
+	}
+	
 	printf("Client: message from server: %s \n", buf);
-	// TODO handle the close
-	close(client_socket);
+	
+	int e_clo = close(client_socket);
+	if (e_clo==-1) {
+		perror("The close failed");
+		exit(-1);
+	}
 	printf("Client: exit \n");
 	exit(0);
 }

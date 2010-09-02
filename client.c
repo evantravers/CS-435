@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// check to see if the strings match
-	if (strcmp(buf, "ping")) {
+	if (strcmp(buf, "pong")) {
 		printf("server string does not match pong\n");
 	}
 	else {

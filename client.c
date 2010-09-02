@@ -5,6 +5,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <stdlib.h>
+#include <errno.h>
 
 int main(int argc, char *argv[]) {
 	char buf[512];
@@ -18,9 +19,12 @@ int main(int argc, char *argv[]) {
 		perror("gethostbyname has failed");
 		exit(-1);
 	}
+	
+	// CHANGED get port number
+	
 	// CHANGED memcpy thing
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
-	Remote_Address.sin_port=htons(10234);
+	Remote_Address.sin_port=htons(atoi(argv[2]));
 
 	int e_con = connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
 	if (e_con==-1) {
@@ -28,14 +32,15 @@ int main(int argc, char *argv[]) {
 		exit(-1);
 	}
 	
-	// FIXED handle the write
+	// CHANGED handle the write
 	int e_wri = write(client_socket, "ping", 5);
 	if (e_wri==-1) {
 		perror("write has failed");
 		exit(-1);
 	}
 	
-	// FIXED handle the read
+	// TODO check the message received from the server
+	// CHANGED handle the read
 	int e_rea = read(client_socket, buf, 512);
 	if (e_rea==-1) {
 		perror("the read has failed");

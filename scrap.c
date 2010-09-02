@@ -13,3 +13,6 @@ if (strcmp(string, "hello")) {
 else {
 	printf("you entered hello\n");
 }
+
+===============================================================
+

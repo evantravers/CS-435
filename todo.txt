@@ -1,3 +1,2 @@
-server.c:11:// TODO handle the system call error handling
-server.c:45:		// TODO take care of read
-server.c:49:		// TODO take care of write
+client.c:42:	// TODO check the message received from the server
+server.c:48:		// TODO check to see that the client sends the correct message.		

@@ -1,1 +1,4 @@
 This is for purely academic purposes only. You have been warned.
+
+Server: takes a port # as an argument
+Client: Take an IP and a port as arguments

@@ -1,6 +1,7 @@
 client.c:23:	// CHANGED get port number
 client.c:25:	// CHANGED memcpy thing
 client.c:35:	// CHANGED handle the write
+client.c:42:	// CHANGED check the message received from the server
 client.c:43:	// CHANGED handle the read
 server.c:11:// CHANGED handle the system call error handling
 server.c:19:	// CHANGED get the port num
@@ -8,6 +9,7 @@ server.c:23:	// CHANGED take care of Socket
 server.c:28:	// CHANGED take care of bind
 server.c:34:	// CHANGED take care of listen
 server.c:41:		// CHANGED take care of accept
+server.c:48:		// CHANGED check to see that the client sends the correct message.		
 server.c:49:		// CHANGED take care of read
-server.c:58:		// CHANGED take care of write
-server.c:66:		// CHANGED take care of close
+server.c:63:		// CHANGED take care of write
+server.c:71:		// CHANGED take care of close

@@ -45,7 +45,7 @@ main(int argc, char *argv[]) {
 			exit(-1);
 		}
 		
-		// TODO check to see that the client sends the correct message.		
+		// CHANGED check to see that the client sends the correct message.		
 		// CHANGED take care of read
 		msglength=read(socket_to_client,buf,512);
 		if (msglength==-1) {
@@ -53,7 +53,12 @@ main(int argc, char *argv[]) {
 			exit(-1);
 		}
 		
-		printf("SERVER: msg from client: %s\n", buf);
+		if (strcmp(buf, "ping")) {
+			printf("string does not match ping\n");
+		}
+		else {
+			printf("SERVER: msg from client: %s\n", buf);
+		}
 		
 		// CHANGED take care of write
 		int e_wri = write(socket_to_client, "pong", 5);

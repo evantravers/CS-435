@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		exit(-1);
 	}
 	
-	// TODO check the message received from the server
+	// CHANGED check the message received from the server
 	// CHANGED handle the read
 	int e_rea = read(client_socket, buf, 512);
 	if (e_rea==-1) {
@@ -47,7 +47,13 @@ int main(int argc, char *argv[]) {
 		exit(-1);
 	}
 	
-	printf("Client: message from server: %s \n", buf);
+	// check to see if the strings match
+	if (strcmp(buf, "ping")) {
+		printf("server string does not match pong\n");
+	}
+	else {
+		printf("Client: message from server: %s \n", buf);
+	}
 	
 	int e_clo = close(client_socket);
 	if (e_clo==-1) {

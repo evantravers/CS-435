@@ -1,2 +1,1 @@
-client.c:42:	// TODO check the message received from the server
-server.c:48:		// TODO check to see that the client sends the correct message.		
+server.c:11:// TODO move all the system call error handlers to wrappers

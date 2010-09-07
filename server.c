@@ -8,6 +8,7 @@
 #include <errno.h>
 #include "Socket.h"
 
+// TODO move all the system call error handlers to wrappers
 // CHANGED handle the system call error handling
 // don't forget to use perror()
 
@@ -39,7 +40,7 @@ main(int argc, char *argv[]) {
 	}
 	while (1) {
 		// CHANGED take care of accept
-		socket_to_client=accept(server_socket, 0 ,0);
+		socket_to_client=accept(server_socket, 0, 0);
 		if (socket_to_client==-1) {
 			perror("socket accept has failed");
 			exit(-1);

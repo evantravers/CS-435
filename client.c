@@ -9,18 +9,28 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <sys/select.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "Socket.h"
+#include "Bind.h"
+#include "Listen.h"
+#include "Accept.h"
+#include "Read.h"
+#include "Write.h"
+#include "Close.h"
+#include "Connect.h"
+
 int main(int argc, char *argv[]) {
 	char buf[512];
 	int client_socket;
 	struct sockaddr_in Remote_Address;
 	struct hostent *hp;
-	client_socket = socket(AF_INET, SOCK_STREAM, 0);
+	client_socket = Socket(AF_INET, SOCK_STREAM, 0);
 	Remote_Address.sin_family=AF_INET;
 	hp = gethostbyname(argv[1]);
-	if (hp==NULL) {
-		perror("gethostbyname has failed");
-		exit(-1);
-	}
 	
 	// CHANGED get port number
 	
@@ -28,26 +38,14 @@ int main(int argc, char *argv[]) {
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
 	Remote_Address.sin_port=htons(atoi(argv[2]));
 
-	int e_con = connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
-	if (e_con==-1) {
-		perror("connect has failed");
-		exit(-1);
-	}
+	int e_con = Connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
 	
 	// CHANGED handle the write
-	int e_wri = write(client_socket, "ping", 5);
-	if (e_wri==-1) {
-		perror("write has failed");
-		exit(-1);
-	}
+	int e_wri = Write(client_socket, "ping", 5);
 	
 	// CHANGED check the message received from the server
 	// CHANGED handle the read
-	int e_rea = read(client_socket, buf, 512);
-	if (e_rea==-1) {
-		perror("the read has failed");
-		exit(-1);
-	}
+	int e_rea = Read(client_socket, buf, 512);
 	
 	// check to see if the strings match
 	if (strcmp(buf, "pong")) {
@@ -57,11 +55,8 @@ int main(int argc, char *argv[]) {
 		printf("Client: message from server: %s \n", buf);
 	}
 	
-	int e_clo = close(client_socket);
-	if (e_clo==-1) {
-		perror("The close failed");
-		exit(-1);
-	}
+	int e_clo = Close(client_socket);
+
 	printf("Client: exit \n");
 	exit(0);
 }

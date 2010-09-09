@@ -29,10 +29,6 @@ main(int argc, char *argv[]) {
 	int server_socket, socket_to_client;
 	int procid, tmp;
 	
-	fd_set readfds;
-	int bytes;
-	int i,j,k;
-	
 	// CHANGED get the port num
 	
 	char buf[512];
@@ -49,11 +45,6 @@ main(int argc, char *argv[]) {
 	int e_lis = Listen(server_socket,5);
 	
 	while (1) {
-		
-		// setting the select bits to zero, getting ready to go
-		FD_ZERO(&readfds);
-		FD_SET(0, &readfds);
-		FD_SET(server_socket, &readfds);
 		
 		// CHANGED take care of accept
 		socket_to_client=Accept(server_socket, 0, 0);

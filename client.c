@@ -32,19 +32,13 @@ int main(int argc, char *argv[]) {
 	Remote_Address.sin_family=AF_INET;
 	hp = gethostbyname(argv[1]);
 	
-	// CHANGED get port number
-	
-	// CHANGED memcpy thing
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
 	Remote_Address.sin_port=htons(atoi(argv[2]));
 
 	int e_con = Connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
 	
-	// CHANGED handle the write
 	int e_wri = Write(client_socket, "ping", 5);
 	
-	// CHANGED check the message received from the server
-	// CHANGED handle the read
 	int e_rea = Read(client_socket, buf, 512);
 	
 	// check to see if the strings match

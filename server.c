@@ -22,15 +22,15 @@
 
 main(int argc, char *argv[]) {
 	struct sockaddr_in Server_Address_Passive;
-	int passive_socket;
-	int procid, tmp;
+	int passive_socket, socket_to_client;
+	int procid, tmp, num_clients=0;
 	int open_sockets[16];
 	
 	char buf[512];
 	int msglength;
 	
 	fd_set readfds;
-	int bytes, i;
+	int bytes, i, des_pnt;
 	
 	// set up the passive socket
 	passive_socket=Socket(AF_INET,SOCK_STREAM,0);
@@ -53,13 +53,30 @@ main(int argc, char *argv[]) {
 
 		if (FD_ISSET(passive_socket, &readfds)) {
 			// when the passive socket gets a buzz
+			printf("A client has connected.\n");
 			
 			// bind that connection to another socket
-
+			socket_to_client=Accept(passive_socket, 0, 0);
+			num_clients++;
+			
 			// put that socket in the array
+			open_sockets[num_clients]=socket_to_client;
+			printf("%d\n",socket_to_client);
 		}
-
+		
 		// for each descriptor in the array
+		for (des_pnt = 0; des_pnt < 16; des_pnt++) {
+			if (open_sockets[des_pnt]!=0&&open_sockets[des_pnt]!=-1) {
+				if (FD_ISSET(open_sockets[des_pnt], &readfds)) {
+					// read what the client has to say
+					bytes=recv(server,buffer,512,0);
+					if (bytes<=0) {
+						break;
+					}
+				}
+			}
+		}
+	
 		// check that for data
 		// if there is data, read it and write it back
 		

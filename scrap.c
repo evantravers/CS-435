@@ -153,3 +153,12 @@ int main() {
 */
 
 ===============================================================
+
+/* 
+	Processes in unix 091410
+*/
+
+	i=fork();
+	// creates an exact clone of the current program at the point directly after the fork.
+
+===============================================================

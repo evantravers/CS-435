@@ -19,6 +19,8 @@
 #include "Read.h"
 #include "Write.h"
 #include "Close.h"
+#include "Recv.h"
+#include "Select.h"
 
 main(int argc, char *argv[]) {
 	struct sockaddr_in Server_Address_Passive;
@@ -49,7 +51,7 @@ main(int argc, char *argv[]) {
 		FD_SET(passive_socket, &readfds);
 
 		// start up the select
-		i=select(16, &readfds, 0, 0, 0);
+		i=Select(16, &readfds, 0, 0, 0);
 
 		if (FD_ISSET(passive_socket, &readfds)) {
 			// when the passive socket gets a buzz
@@ -73,45 +75,21 @@ main(int argc, char *argv[]) {
 			if (open_sockets[des_pnt]!=0&&open_sockets[des_pnt]!=-1) {
 				if (FD_ISSET(open_sockets[des_pnt], &readfds)) {
 					// read what the client has to say
-					bytes=recv(des_pnt,buf,512,0);
+					bytes=Recv(des_pnt,buf,512,0);
 					if (bytes<=0) {
 						break;
 					}
 					printf("Message received from client: %s\n",buf);
+					
+					// check that for data
+					// if there is data, read it and write it back
+
+					// if that data is end, then close the connection cleanly
+					
+					// if that data is quit, close all connections and exit itself
 				}
 			}
 		}
-	
-		// check that for data
-		// if there is data, read it and write it back
-		
-		// if that data is quit, then close the connection cleanly
-/*
-	server_socket=Socket(AF_INET,SOCK_STREAM,0);
-	Server_Address_Passive.sin_family=AF_INET;
-	Server_Address_Passive.sin_addr.s_addr=htonl(INADDR_ANY);
-	Server_Address_Passive.sin_port=htons(atoi(argv[1]));
-
-	int e_bin = Bind(server_socket, (struct sockaddr *) &Server_Address_Passive, sizeof(struct sockaddr));
-
-	int e_lis = Listen(server_socket,5);
-	
-	while (1) {
-		socket_to_client=Accept(server_socket, 0, 0);
-	
-		msglength=Read(socket_to_client,buf,512);
-		
-		if (strcmp(buf, "ping")) {
-			printf("string does not match ping\n");
-		}
-		else {
-			printf("SERVER: msg from client: %s\n", buf);
-		}
-		
-		int e_wri = Write(socket_to_client, "pong", 5);		
-		
-		int e_clo = Close(socket_to_client);
-*/
 	}
 	exit(0);
 }

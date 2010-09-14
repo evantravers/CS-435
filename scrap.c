@@ -156,9 +156,38 @@ int main() {
 
 /* 
 	Processes in unix 091410
+	
+	Meanwhile, back at the ranch... the lone ranger disguised as a pool table got his balls racked. 
+		This man. He is awesome.
+		
+	just like in real life, parents killing their child isn't all that uncommon, but the child shouldn't kill the parent.
+	
+	
 */
-
+	int i;
 	i=fork();
+	if (i) {
+		printf("hello from the parent\n");
+	}
+	else {
+		sleep(5);
+		printf("this is from the child\n");
+		exit(0);
+	}
 	// creates an exact clone of the current program at the point directly after the fork.
+	
+	void SignalInterrupt(int sigtype) {
+		printf("caught a signal <%d>\n", sigtype);
+		while (1) {
+			int status, r;
+			r=waitpid(-1, &status, WNOHANG);
+			if (r <= 0) {
+				return;
+				printf("exit status=%d\n", WEXITSTATUS(status));
+			}
+		}
+	}
+	
+	signal(SIGCHLD,SignalInterrupt);
 
 ===============================================================

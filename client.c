@@ -24,7 +24,6 @@
 #include "Connect.h"
 #include "Select.h"
 #include "Recv.h"
-#include "Gethostbyname.h"
 
 int main(int argc, char *argv[]) {
 	char buf[512];
@@ -33,7 +32,6 @@ int main(int argc, char *argv[]) {
 	struct hostent *hp;
 	server_socket = Socket(AF_INET, SOCK_STREAM, 0);
 	Remote_Address.sin_family=AF_INET;
-	// TODO see if you can fix the wrapper for this.
 	hp = gethostbyname(argv[1]);
 	fd_set readfds;
 	int bytes;
@@ -43,6 +41,7 @@ int main(int argc, char *argv[]) {
 	Remote_Address.sin_port=htons(atoi(argv[2]));
 
 	Connect(server_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
+	//printf("You are now connected to the server. Type a line to see it echoed back.\n");
 	while (1) {
 		FD_ZERO(&readfds);
 		FD_SET(0, &readfds);

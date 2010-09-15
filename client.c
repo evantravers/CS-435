@@ -22,34 +22,58 @@
 #include "Write.h"
 #include "Close.h"
 #include "Connect.h"
+#include "Select.h"
+#include "Recv.h"
 
 int main(int argc, char *argv[]) {
 	char buf[512];
-	int client_socket;
+	int server_socket;
 	struct sockaddr_in Remote_Address;
 	struct hostent *hp;
-	client_socket = Socket(AF_INET, SOCK_STREAM, 0);
+	server_socket = Socket(AF_INET, SOCK_STREAM, 0);
 	Remote_Address.sin_family=AF_INET;
 	hp = gethostbyname(argv[1]);
+	fd_set readfds;
+	int bytes;
+	int i,j,k;
 	
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
 	Remote_Address.sin_port=htons(atoi(argv[2]));
 
-	int e_con = Connect(client_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
+	Connect(server_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
+	while (1) {
+		FD_ZERO(&readfds);
+		FD_SET(0, &readfds);
+		FD_SET(server_socket, &readfds);
+		bzero(buf,sizeof(buf));
+
+		i=Select(16, &readfds, 0, 0, 0);
 	
-	int e_wri = Write(client_socket, "ping", 5);
+		// check to see if the server bit is being set, and read from it
+		if (FD_ISSET(server_socket, &readfds)) {
+			bytes=Recv(server_socket,buf,512,0);
+			// echo this back
+			printf("Message from server: %s\n", buf);
+			if (bytes<=0) {
+				break;
+			}
+		}
 	
-	int e_rea = Read(client_socket, buf, 512);
-	
-	// check to see if the strings match
-	if (strcmp(buf, "pong")) {
-		printf("server string does not match pong\n");
+		// check to see if the stdin is being set, and read from it
+		if (FD_ISSET(0, &readfds)) {
+			bytes=Read(fileno(stdin),buf,512);
+			if (bytes<=0) {
+				break;
+			}
+			else {
+				//printf("You just typed: %s\n", buf);
+				buf[bytes]=0;
+				Write(server_socket, buf, 512);
+			}
+		}
 	}
-	else {
-		printf("Client: message from server: %s \n", buf);
-	}
 	
-	int e_clo = Close(client_socket);
+	Close(server_socket);
 
 	printf("Client: exit \n");
 	exit(0);

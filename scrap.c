@@ -158,9 +158,13 @@ int main() {
 	Processes in unix 091410
 	
 	Meanwhile, back at the ranch... the lone ranger disguised as a pool table got his balls racked. 
+	
+	The fit begins to hit the shan.
+	
 		This man. He is awesome.
 		
 	just like in real life, parents killing their child isn't all that uncommon, but the child shouldn't kill the parent.
+	
 	
 	
 */
@@ -187,6 +191,8 @@ int main() {
 			}
 		}
 	}
+	
+	// .......
 	
 	signal(SIGCHLD,SignalInterrupt);
 

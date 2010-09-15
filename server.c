@@ -32,7 +32,7 @@ main(int argc, char *argv[]) {
 	int msglength;
 	
 	fd_set readfds;
-	int bytes, i, des_pnt, counter=0;
+	int bytes, i, j, counter=0;
 	
 	// set up the passive socket
 	passive_socket=Socket(AF_INET,SOCK_STREAM,0);
@@ -49,44 +49,64 @@ main(int argc, char *argv[]) {
 		FD_ZERO(&readfds);
 		FD_SET(0, &readfds);
 		FD_SET(passive_socket, &readfds);
+		bzero(buf,sizeof(buf));
+
+		// update readfds based on open_sockets
+		for (i = 0; i < 16; ++i) {
+			if (open_sockets[i]!=0&&open_sockets[i]!=-1) {
+				FD_SET(open_sockets[i], &readfds);
+			}
+		}
 
 		// start up the select
-		i=Select(16, &readfds, 0, 0, 0);
+		Select(16, &readfds, 0, 0, 0);
 
-		if (FD_ISSET(passive_socket, &readfds)) {
-			// when the passive socket gets a buzz
-			printf("A client has connected.\n");
-			
+		if (FD_ISSET(passive_socket, &readfds)) {			
 			// bind that connection to another socket
-			socket_to_client=Accept(passive_socket, 0, 0);
-			// CHANGED make the array add wherever there isn't a null or -1
+			socket_to_client=Accept(passive_socket, 0, 0);	
 			
 			// put that socket in the array
 			for (counter = 0; counter < 16; ++counter) {
 				if (open_sockets[counter]==0) {
 					open_sockets[counter]=socket_to_client;
+					// when the passive socket gets a buzz
+					printf("A client %d has connected.\n", counter);
 					break;
 				}
 			}
 		}
 		
 		// for each descriptor in the array
-		for (des_pnt = 0; des_pnt < 16; des_pnt++) {
-			if (open_sockets[des_pnt]!=0&&open_sockets[des_pnt]!=-1) {
-				if (FD_ISSET(open_sockets[des_pnt], &readfds)) {
+		for (i = 0; i < 16; i++) {
+			if (open_sockets[i]!=0&&open_sockets[i]!=-1) {
+				if (FD_ISSET(open_sockets[i], &readfds)) {
 					// read what the client has to say
-					bytes=Recv(des_pnt,buf,512,0);
+					bytes=Recv(open_sockets[i],buf,512,0);
 					if (bytes<=0) {
 						break;
 					}
-					printf("Message received from client: %s\n",buf);
-					
-					// check that for data
-					// if there is data, read it and write it back
-
-					// if that data is end, then close the connection cleanly
-					
-					// if that data is quit, close all connections and exit itself
+					else {
+						printf("Client %d sent %s\n", i, buf);
+						// check for killswitch
+							if (!strcmp(buf, "quit\n")) {
+								// if that data is quit, close all connections and exit itself
+								for (j = 0; j < 16; ++j) {
+									Write(open_sockets[j], "Goodbye!\n", 512);
+									Close(open_sockets[j]);
+									printf("Closing all connections and exiting.\n");
+									exit(0);
+								}
+							}
+							if (!strcmp(buf, "end\n")) {
+								// if that data is end, then close the connection cleanly
+								Write(open_sockets[i], "Goodbye!\n", 512);
+								Close(open_sockets[i]);
+								open_sockets[i]=0;
+							}
+							
+						// if there is data, read it and write it back
+						Write(open_sockets[i], buf, 512);
+					}
 				}
 			}
 		}

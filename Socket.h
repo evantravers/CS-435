@@ -1,3 +1,4 @@
+// CS 435 Evan Travers
 int Socket(int domain, int type, int protocol) {
 	int server_socket = socket(domain,type,protocol);
 	if (server_socket==-1) {

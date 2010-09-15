@@ -24,6 +24,7 @@
 #include "Connect.h"
 #include "Select.h"
 #include "Recv.h"
+#include "Gethostbyname.h"
 
 int main(int argc, char *argv[]) {
 	char buf[512];
@@ -32,6 +33,7 @@ int main(int argc, char *argv[]) {
 	struct hostent *hp;
 	server_socket = Socket(AF_INET, SOCK_STREAM, 0);
 	Remote_Address.sin_family=AF_INET;
+	// TODO see if you can fix the wrapper for this.
 	hp = gethostbyname(argv[1]);
 	fd_set readfds;
 	int bytes;

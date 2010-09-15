@@ -99,6 +99,7 @@ main(int argc, char *argv[]) {
 							}
 							if (!strcmp(buf, "end\n")) {
 								// if that data is end, then close the connection cleanly
+								printf("Client %d has exited\n", i);
 								Write(open_sockets[i], "Goodbye!\n", 512);
 								Close(open_sockets[i]);
 								open_sockets[i]=0;

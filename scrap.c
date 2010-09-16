@@ -195,5 +195,7 @@ int main() {
 	// .......
 	
 	signal(SIGCHLD,SignalInterrupt);
+	
+	if (errno == EINTR) continue
 
 ===============================================================

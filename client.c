@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
 	hp = gethostbyname(argv[1]);
 	fd_set readfds;
 	int bytes;
-	int i,j,k;
+	int i;
 	
 	memcpy((unsigned char *) &Remote_Address.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
 	Remote_Address.sin_port=htons(atoi(argv[2]));

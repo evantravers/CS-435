@@ -27,6 +27,9 @@ void SignalInterrupt(int sigtype) {
 	while (1) {
 		int status, r;
 		r=waitpid(-1, &status, WNOHANG);
+		if (r<=0) {
+			return;
+		}
 		if (WEXITSTATUS(status) == 1) {
 			kill(0, SIGKILL);
 			exit(0);
@@ -36,16 +39,14 @@ void SignalInterrupt(int sigtype) {
 
 main(int argc, char *argv[]) {
 	struct sockaddr_in Server_Address_Passive;
-	int passive_socket, socket_to_client, server_socket;
-	int procid, tmp;
-	int open_sockets[16];
+	int passive_socket, socket_to_client;
 	
 	signal(SIGCHLD,SignalInterrupt);
 	
 	char buf[512];
-	int msglength, forknum;
+	int forknum;
 
-	int bytes, i, j, counter=0;
+	int bytes;
 	
 	// set up the passive socket
 	passive_socket=Socket(AF_INET,SOCK_STREAM,0);
@@ -58,7 +59,7 @@ main(int argc, char *argv[]) {
 	
 	while(1) {
 		socket_to_client=Accept(passive_socket, 0, 0);
-		
+		printf("A client has connected\n");
 		int forknum = fork();
 		while (forknum==0) {
 			// do client handling in here

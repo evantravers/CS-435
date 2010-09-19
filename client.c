@@ -54,6 +54,10 @@ int main(int argc, char *argv[]) {
 		if (FD_ISSET(server_socket, &readfds)) {
 			bytes=Recv(server_socket,buf,512,0);
 			// echo this back
+			if (!strcmp(buf, "quit")) {
+				printf("Shutting down.\n");
+				exit(0);
+			}
 			printf("Message from server: %s\n", buf);
 			if (bytes<=0) {
 				break;

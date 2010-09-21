@@ -41,7 +41,7 @@ int main(int argc, char *argv[]) {
 	Remote_Address.sin_port=htons(atoi(argv[2]));
 
 	Connect(server_socket, (struct sockaddr *)&Remote_Address, sizeof(Remote_Address));
-	//printf("You are now connected to the server. Type a line to see it echoed back.\n");
+	printf("You are now connected to the server. Type a line to see it echoed back.\n");
 	while (1) {
 		FD_ZERO(&readfds);
 		FD_SET(0, &readfds);
@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 				printf("Shutting down.\n");
 				exit(0);
 			}
-			printf("Message from server: %s\n", buf);
+			printf("Server: %s\n", buf);
 			if (bytes<=0) {
 				break;
 			}

@@ -68,7 +68,7 @@ main(int argc, char *argv[]) {
 				break;
 			}
 			else {
-				printf("A client sent %s\n", buf);
+				printf("Client: %s\n", buf);
 				// check for killswitch
 					if (!strcmp(buf, "quit\n")) {
 						// if that data is quit, close all connections and exit itself

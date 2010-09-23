@@ -16,7 +16,7 @@ else {
 	printf("you entered hello\n");
 }
 
-===============================================================
+//===============================================================
 // select 090210
 // this code is intended to set up a listener on a both server and input sockets,
 // that only reads when it has data to work with, thus preventing blocks.
@@ -68,7 +68,7 @@ else {
 		}
 	}
 	
-===============================================================
+//===============================================================
 
 // signal 090710
 
@@ -140,7 +140,7 @@ int main() {
 	---------
 }
 
-===============================================================
+//===============================================================
 
 /*
 
@@ -152,7 +152,7 @@ int main() {
 
 */
 
-===============================================================
+//===============================================================
 
 /* 
 	Processes in unix 091410
@@ -198,4 +198,76 @@ int main() {
 	
 	if (errno == EINTR) continue
 
-===============================================================
+//===============================================================
+
+/* 
+	092110 Working with unix in C programs
+	AKA, making your program behave as standard in. Most unix programs read from standard in, so we'll have to write to stdin
+
+	// takes two file descriptors, makes the destination look exactly like the source
+	// you can reroute stdin stdout this way.
+	
+	// Hiatt recommends that you don't dup within your main program, but instead use an outside source.
+	
+	----[MyProg]<----------------------
+	|							      |
+	|							      |
+	---->STDIN-->[ExtProg]-->STDONT-->
+*/
+	
+	dup2(int oldfd, int newfd);
+	
+	int fd=open("file.out", O_WRONLY | O_CREAT | S_IRWXU);
+	printf("this is before the dup2\n");
+	write(fd,"this is data\n",13);
+	// dupes the current file over stdout
+	// no way to get it back unless you you "save" a copy of stdin somewhere else
+	// fd<-1 i.e. copies/points 1 to fd
+	dup2(fd,1);
+	printf("this is after the dup2\n");
+	close (fd);
+	
+/*
+	child process is going to spawn another child, that will make the execs. One process for each command sent over the network.
+	
+	This way we'll learn to levy the power of the smaller programs in Unix
+	TODO looks like I'll need to write wrappers for pipe, execvp, dup2, and sleep.
+*/
+
+	int i, infd[2];
+	char buf[4096];
+	signal(SIGCHLD,SignalInterrupt);
+	pipe(infd);
+	printf("creating child process...\n");
+	i=fork();
+	if (i==0) {
+		char *argv[3];
+		argv[0]="/bin/ls";
+		argv[1]="-L";
+		argv[2]=0;
+		// read from 0 end, write to 1 end. (pipe)
+		dup2(infd[1],1);
+		dup2(infd[1],2);
+		execvp(argv[0], argv);
+		printf("exec failed\n");
+		exit(0);
+	}
+	else {
+		sleep(5);
+		printf("reading from the pipe...\n");
+		int bytes=read(infd[0],buf,4096);
+		printf("read %d bytes\n", bytes);
+		write(1,buf,bytes);
+	}
+
+//===============================================================
+
+	/*
+		Assignment 4: should be able to execute /bin/ls -al and return the results from the server
+		to the client.
+		
+		
+		
+	*/
+
+//===============================================================

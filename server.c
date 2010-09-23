@@ -61,7 +61,7 @@ main(int argc, char *argv[]) {
 		socket_to_client=Accept(passive_socket, 0, 0);
 		printf("A client has connected\n");
 		int forknum = fork();
-		while (forknum==0) {
+		while (forknum==0) {			
 			// do client handling in here
 			bytes=Recv(socket_to_client,buf,512,0);
 			if (bytes<=0) {

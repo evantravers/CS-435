@@ -3,7 +3,7 @@ int Write(int fd, const void *buf, size_t count) {
 	int e_wri=write(fd, buf, count);
 	if (e_wri==-1) {
 		perror("write has failed");
-		exit(-1);
+		exit(0);
 	}
 	else {
 		return e_wri;

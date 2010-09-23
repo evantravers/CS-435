@@ -266,8 +266,23 @@ int main() {
 		Assignment 4: should be able to execute /bin/ls -al and return the results from the server
 		to the client.
 		
-		
-		
 	*/
+	
+	// the below is an example of the string tokenizer... very simple.
+	// do remember that buf is destroyed as strtok goes along. So if you
+	// need it again, then copy it or something. Last time it'll return a zero.
+	// consider making a global variable to aid quitting
+	
+	char *p, buf[128] = {"this is a string     of     multiple      tokens"};
+	printf("buf=%s\n", buf);
+	p=strtok(buf, " ");
+	printf("token=%s\n", p);
+	while (1) {
+		p=strtok(NULL, " ");
+		if (!p) {
+			break;
+		}
+		printf("token=%s\n", p);
+	}
 
 //===============================================================

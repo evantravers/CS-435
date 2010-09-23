@@ -6,7 +6,7 @@ struct hostent *Gethostbyname(const char *name) {
 	struct hostent e_ghn = gethostbyname(name);
 	if (e_ghn == NULL) {
 		perror("gethostbyname has failed");
-		exit(-1);
+		exit(0);
 	} else {
 		return e_ghn;
 	}

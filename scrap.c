@@ -288,3 +288,70 @@ int main() {
 	}
 
 //===============================================================
+
+	/*
+		UDP 100510
+		
+		UDP requires error checking, and care about who is sending and receiveing.
+		
+		solution to the timeout wait problem, maintain the buffer, and if a time passes, resend.
+		
+		guaruntee that the server will lose packets, explain how. Don't set the buffer sizes. Flood?
+		Select might help us with the timeout structure.
+		
+		there are issues with the length of the timeout, which needs to be just slightly longer than the time it takes to send it around the network.
+	*/
+	
+		// server
+		#include <stdio.h>
+		#include <sys/types.h>
+		#include <sys/socket.h>
+		#include <netinet/in.h>
+		#include <netdb.h>
+		// a few more here
+		
+		struct sockaddr_in from, server;
+		struct hostent *hp;
+		int my_socket, bytes;
+		char buf[512];
+		unsigned int fromlen;
+	
+		my_socket=socket(AF_INTE, SOCK_DGRAM,0);
+		bzero((char*) &server, sizeof(server));
+		server.sin_family=AF_INET;
+		server.sin_addr.s_addr=htonl(INADDR_ANY);
+		// TODO change this cmd line argument
+		server.sin_port=htons(4096);
+		
+		bind(my_socket, (struct sockaddr *) &server, sizeof(server));
+		
+		while(1) {
+			bytes=recvrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
+			printf("SERVER: read %d bytes from IP %s (%s)\n", bytes, inet_ntoa(from.sin_addr),buf);
+			if (!strcmp(buf, "quit")) {
+				break;
+			}
+			bytes=sendto(my_socket,buf,strlen(buf)+1,0,(struct sockaddr *) &from, sizeof(from));
+			
+		}
+		close(my_socket);
+
+		// client
+		int my_socket;
+		char buf[512];
+		int bytes;
+		unsigned int fromlen;
+		
+		my_socket=socket(AF_INET, SOCK_DGRAM,0);
+		hp=gethostbyname(argv[1]);
+		server.sin_family=AF_NET;
+		memcpy((unsigned char *) &server.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
+		server.sin_port=htons(4096);
+		
+		bytes=sendto(my_socket,argv[2],strlen(argv[2])=1,0,(strct sockaddr *) &server, sizeof(server)));
+		
+		fromlen=sizeof(from);
+		bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
+		close(my_socket);
+		
+//===============================================================

@@ -21,6 +21,8 @@
 #include "Close.h"
 #include "Recv.h"
 #include "Select.h"
+#include "Execvp.h"
+#include "Dup2.h"
 
 void SignalInterrupt(int sigtype) {
 	//printf("caught a signal <%d>\n", sigtype);
@@ -68,7 +70,6 @@ main(int argc, char *argv[]) {
 				break;
 			}
 			else {
-				// received a message. fork off a grandchild, just to handle the thing.
 				printf("Client: %s\n", buf);
 				// check for killswitch
 					if (!strcmp(buf, "quit\n")) {
@@ -87,8 +88,34 @@ main(int argc, char *argv[]) {
 						Close(socket_to_client);
 						exit(0);
 					}
-
-				// if there is data, read it and write it back
+					
+					int forknum2=fork();
+					while (forknum2==0) {
+						// tokenize the buffer string into an array
+						// of strings
+						char *x;
+						char *args[15];
+						x=strtok(buf, " ,\n");
+						args[0]=x;
+						
+						int k=0;
+						while(1) {
+							k++;
+							x=strtok(NULL," ,\n");
+							if (!x||k==14) {
+								break;
+							}
+							args[k]=x;
+						}
+						
+						dup2(socket_to_client,1);
+						dup2(socket_to_client,2);
+						
+						execvp(args[0],args);
+						exit(0);
+					}
+					
+				// received a message. fork off a grandchild, just to handle the thing.
 				Write(socket_to_client, buf, 512);
 			}
 		}

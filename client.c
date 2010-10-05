@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 				printf("Shutting down.\n");
 				exit(0);
 			}
-			printf("Server: %s\n", buf);
+			printf(">: %s\n", buf);
 			if (bytes<=0) {
 				break;
 			}

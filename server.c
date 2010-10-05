@@ -19,53 +19,78 @@
 #include "Read.h"
 #include "Write.h"
 #include "Close.h"
+#include "Recv.h"
+#include "Select.h"
 
-// TODO move all the system call error handlers to wrappers
-// CHANGED handle the system call error handling
-// don't forget to use perror()
+void SignalInterrupt(int sigtype) {
+	//printf("caught a signal <%d>\n", sigtype);
+	while (1) {
+		int status, r;
+		r=waitpid(-1, &status, WNOHANG);
+		if (r<=0) {
+			return;
+		}
+		if (WEXITSTATUS(status) == 1) {
+			kill(0, SIGKILL);
+			exit(0);
+		}
+	}
+}
 
 main(int argc, char *argv[]) {
 	struct sockaddr_in Server_Address_Passive;
-	int server_socket, socket_to_client;
-	int procid, tmp;
+	int passive_socket, socket_to_client;
 	
-	// CHANGED get the port num
+	signal(SIGCHLD,SignalInterrupt);
 	
 	char buf[512];
-	int msglength;
-	// CHANGED take care of Socket
-	server_socket=Socket(AF_INET,SOCK_STREAM,0);
+	int forknum;
+
+	int bytes;
+	
+	// set up the passive socket
+	passive_socket=Socket(AF_INET,SOCK_STREAM,0);
 	Server_Address_Passive.sin_family=AF_INET;
 	Server_Address_Passive.sin_addr.s_addr=htonl(INADDR_ANY);
 	Server_Address_Passive.sin_port=htons(atoi(argv[1]));
-	// CHANGED take care of bind
-	int e_bin = Bind(server_socket, (struct sockaddr *) &Server_Address_Passive, sizeof(struct sockaddr));
-
-	// CHANGED take care of listen
-	int e_lis = Listen(server_socket,5);
 	
-	while (1) {
-		
-		// CHANGED take care of accept
-		socket_to_client=Accept(server_socket, 0, 0);
-		
-		// CHANGED check to see that the client sends the correct message.		
-		// CHANGED take care of read
-		msglength=Read(socket_to_client,buf,512);
-		
-		if (strcmp(buf, "ping")) {
-			printf("string does not match ping\n");
+	Bind(passive_socket, (struct sockaddr *) &Server_Address_Passive, sizeof(struct sockaddr));
+	Listen(passive_socket,5);
+	
+	while(1) {
+		socket_to_client=Accept(passive_socket, 0, 0);
+		printf("A client has connected\n");
+		int forknum = fork();
+		while (forknum==0) {			
+			// do client handling in here
+			bytes=Recv(socket_to_client,buf,512,0);
+			if (bytes<=0) {
+				break;
+			}
+			else {
+				// received a message. fork off a grandchild, just to handle the thing.
+				printf("Client: %s\n", buf);
+				// check for killswitch
+					if (!strcmp(buf, "quit\n")) {
+						// if that data is quit, close all connections and exit itself
+						Write(socket_to_client, "Goodbye!\n", 512);
+						Write(socket_to_client, "quit", 512);
+						Close(socket_to_client);
+						printf("Closing all connections and exiting.\n");
+						exit(1);
+					}
+					if (!strcmp(buf, "end\n")) {
+						// if that data is end, then close the connection cleanly
+						printf("Client has exited\n");
+						Write(socket_to_client, "Goodbye!\n", 512);
+						Write(socket_to_client, "quit", 512);
+						Close(socket_to_client);
+						exit(0);
+					}
+
+				// if there is data, read it and write it back
+				Write(socket_to_client, buf, 512);
+			}
 		}
-		else {
-			printf("SERVER: msg from client: %s\n", buf);
-		}
-		
-		// CHANGED take care of write
-		int e_wri = Write(socket_to_client, "pong", 5);		
-		
-		// CHANGED take care of close
-		int e_clo = Close(socket_to_client);
-		
-		exit(0);
 	}
 }

@@ -26,7 +26,7 @@
 #include "Recv.h"
 
 int main(int argc, char *argv[]) {
-	char buf[512];
+	char buf[4096];
 	int server_socket;
 	struct sockaddr_in Remote_Address;
 	struct hostent *hp;
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	
 		// check to see if the server bit is being set, and read from it
 		if (FD_ISSET(server_socket, &readfds)) {
-			bytes=Recv(server_socket,buf,512,0);
+			bytes=Recv(server_socket,buf,4096,0);
 			// echo this back
 			if (!strcmp(buf, "quit")) {
 				printf("Shutting down.\n");
@@ -66,14 +66,14 @@ int main(int argc, char *argv[]) {
 	
 		// check to see if the stdin is being set, and read from it
 		if (FD_ISSET(0, &readfds)) {
-			bytes=Read(fileno(stdin),buf,512);
+			bytes=Read(fileno(stdin),buf,4096);
 			if (bytes<=0) {
 				break;
 			}
 			else {
 				//printf("You just typed: %s\n", buf);
 				buf[bytes]=0;
-				Write(server_socket, buf, 512);
+				Write(server_socket, buf, 4096);
 			}
 		}
 	}

@@ -47,7 +47,7 @@ main(int argc, char *argv[]) {
 	
 	signal(SIGCHLD,SignalInterrupt);
 	
-	char buf[512];
+	char buf[4096];
 	int forknum;
 
 	int bytes;
@@ -67,7 +67,7 @@ main(int argc, char *argv[]) {
 		int forknum = fork();
 		while (forknum==0) {			
 			// do client handling in here
-			bytes=Recv(socket_to_client,buf,512,0);
+			bytes=Recv(socket_to_client,buf,4096,0);
 			if (bytes<=0) {
 				break;
 			}
@@ -76,8 +76,8 @@ main(int argc, char *argv[]) {
 				// check for killswitch
 					if (!strcmp(buf, "quit\n")) {
 						// if that data is quit, close all connections and exit itself
-						Write(socket_to_client, "Goodbye!\n", 512);
-						Write(socket_to_client, "quit", 512);
+						Write(socket_to_client, "Goodbye!\n", 4096);
+						Write(socket_to_client, "quit", 4096);
 						Close(socket_to_client);
 						printf("Closing all connections and exiting.\n");
 						exit(1);
@@ -85,8 +85,8 @@ main(int argc, char *argv[]) {
 					if (!strcmp(buf, "end\n")) {
 						// if that data is end, then close the connection cleanly
 						printf("Client has exited\n");
-						Write(socket_to_client, "Goodbye!\n", 512);
-						Write(socket_to_client, "quit", 512);
+						Write(socket_to_client, "Goodbye!\n", 4096);
+						Write(socket_to_client, "quit", 4096);
 						Close(socket_to_client);
 						exit(0);
 					}
@@ -118,7 +118,7 @@ main(int argc, char *argv[]) {
 					}
 					
 				// received a message. fork off a grandchild, just to handle the thing.
-				Write(socket_to_client, buf, 512);
+				Write(socket_to_client, buf, 4096);
 			}
 		}
 	}

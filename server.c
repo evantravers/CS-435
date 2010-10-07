@@ -11,6 +11,8 @@
 #include <sys/select.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <wait.h>
+#include <signal.h>
 
 #include "Socket.h"
 #include "Bind.h"

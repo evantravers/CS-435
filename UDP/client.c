@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
 #include <netdb.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -16,31 +17,40 @@
 #include <unistd.h>
 
 #include "Socket.h"
+#include "Setsockopt.h"
+#include "Sendto.h"
+// TODO: fix the wrapper for recvfrom
+// #include "Recvfrom.h"
 
 main(int argc, char *argv[]) {
 	
 	// initialize
-	int my_socket;
+	int my_socket, on=1, off=0;
+	struct sockaddr_in from, server;
 	char buf[512];
 	int bytes;
-	struct sockaddr_in server, from;
 	unsigned int fromlen;
-	struct hostent *hp;
 	
-	// send broadcast to potential servers
-	// get connection back
 	my_socket=Socket(AF_INET, SOCK_DGRAM,0);
-	hp=gethostbyname(argv[1]);
-	server.sin_family=AF_INET;
-	memcpy((unsigned char *) &server.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
-	server.sin_port=htons(4096);
 	
-	// send/receive message
-	// TODO write a sendto thingo
-	// TODO write a recvfrom
-	bytes=sendto(my_socket, argv[2], strlen(argv[2])+1, 0, (struct sockaddr *) &server, sizeof(server));
+	bzero(&server, sizeof(server));
+	server.sin_family=AF_INET;
+	server.sin_port = htons(atoi(argv[1]));
+	
+	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, 4);
+	inet_pton(AF_INET, "192.168.1.111", &server.sin_addr);
+	bytes = Sendto(my_socket, argv[2], strlen(argv[2])+1, 0, (struct sockaddr *) &server, sizeof(server));
+	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &off,4);
 	
 	fromlen=sizeof(from);
 	bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
+	printf("%s\n", buf	);
+	
 	close(my_socket);
+	
+	// send broadcast to potential servers
+	
+	// establish connection using the packet you receive back
+	
+	// close connection when finished.
 }

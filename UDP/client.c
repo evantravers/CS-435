@@ -44,9 +44,20 @@ main(int argc, char *argv[]) {
 	inet_pton(AF_INET, "192.168.1.111", &server.sin_addr);
 	bytes = Sendto(my_socket, argv[2], strlen(argv[2])+1, 0, (struct sockaddr *) &server, sizeof(server));
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &off,4);
-	
 	fromlen=sizeof(from);
 	bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
 	printf("Received from server: %s\n", buf);
+	
+	// time to test the connection
+	int x=0;
+	while(x<2000) {
+		bytes = Sendto(my_socket, buf, sizeof(buf), 0, (struct sockaddr *) &server, sizeof(server));
+		
+		bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
+		printf("Received from server: %s\n", buf);
+		x++;
+	}
+	
+	bytes = Sendto(my_socket, "quit", sizeof("quit"), 0, (struct sockaddr *) &server, sizeof(server));
 	close(my_socket);
 }

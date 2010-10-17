@@ -34,13 +34,15 @@ main(int argc, char *argv[]) {
 	Bind(my_socket, (struct sockaddr *) &server, sizeof(server));
 	
 	while(1) {
+		fromlen=sizeof(from);
 		bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
 		printf("SERVER: read %d bytes from IP %d (%s)\n", bytes, inet_ntoa(from.sin_addr), buf);
+		printf("Sending the data back...\n");
+		bytes=sendto(my_socket, buf, strlen(buf)+1, 0, (struct sockaddr *) &from, sizeof(from));
 		if (!strcmp(buf, "quit")) {
+			// Should send quit to the client
 			break;
 		}
-		bytes=sendto(my_socket, buf, strlen(buf)+1, 0, (struct sockaddr *) &from, sizeof(from));
-		
 	}
 	close(my_socket);
 }

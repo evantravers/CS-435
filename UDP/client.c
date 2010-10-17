@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "Socket.h"
+#include "Socket.h"``
 #include "Setsockopt.h"
 #include "Sendto.h"
 // TODO: fix the wrapper for recvfrom
@@ -37,20 +37,16 @@ main(int argc, char *argv[]) {
 	server.sin_family=AF_INET;
 	server.sin_port = htons(atoi(argv[1]));
 	
+	// send broadcast message to servers
+	
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, 4);
+	// TODO figure out a more elegant solution to this problem.
 	inet_pton(AF_INET, "192.168.1.111", &server.sin_addr);
 	bytes = Sendto(my_socket, argv[2], strlen(argv[2])+1, 0, (struct sockaddr *) &server, sizeof(server));
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &off,4);
 	
 	fromlen=sizeof(from);
 	bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
-	printf("%s\n", buf	);
-	
+	printf("Received from server: %s\n", buf);
 	close(my_socket);
-	
-	// send broadcast to potential servers
-	
-	// establish connection using the packet you receive back
-	
-	// close connection when finished.
 }

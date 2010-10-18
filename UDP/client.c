@@ -26,7 +26,7 @@
 
 main(int argc, char *argv[]) {
 	if (argc != 4) {
-		printf("Usage: ./client <localhost> <port> <message> \n");
+		printf("Usage: ./client <subnet mask (i.e. 255.255.255.255)> <port> <message> \n");
 		exit(0);
 	}
 	
@@ -50,6 +50,7 @@ main(int argc, char *argv[]) {
 	server.sin_family = AF_INET;
 	server.sin_port = htons(atoi(argv[2]));
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
+	server.sin_addr.s_addr|=htonl(0xff);
 	
 	// send the message
 	bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	

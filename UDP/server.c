@@ -34,7 +34,6 @@ main(int argc, char *argv[]) {
 	unsigned int fromlen;
 
 	my_socket=Socket(AF_INET, SOCK_DGRAM,0);
-	bzero((char*) &server, sizeof(server));
 	server.sin_family=AF_INET;
 	server.sin_addr.s_addr=htonl(INADDR_ANY);
 	server.sin_port=htons(atoi(argv[1]));

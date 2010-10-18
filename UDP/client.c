@@ -51,11 +51,14 @@ main(int argc, char *argv[]) {
 	server.sin_port = htons(atoi(argv[2]));
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
 	
+	// send the message
 	bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	
 	printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
+	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));	
+	
 	fromlen = sizeof(server);
 	bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
 	printf("Read from server: %s\n", buf);
-	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));	
+	
 	Close(my_socket);
 }

@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 #include <netdb.h>
 #include <stdlib.h>
@@ -19,45 +20,42 @@
 #include "Socket.h"
 #include "Setsockopt.h"
 #include "Sendto.h"
-// TODO: fix the wrapper for recvfrom
-// #include "Recvfrom.h"
+#include "Close.h"
+#include "Recvfrom.h"
+#include "Bind.h"
 
 main(int argc, char *argv[]) {
+	if (argc != 4) {
+		printf("Usage: ./client <localhost> <port> <message> \n");
+		exit(0);
+	}
 	
 	// initialize
 	int my_socket, on=1, off=0;
-	struct sockaddr_in from, server;
+	struct hostent *hp;
+	struct sockaddr_in client, server;
 	char buf[512];
 	int bytes;
 	unsigned int fromlen;
+
+	// initialize sockets	
+	hp = gethostbyname(argv[1]);
+	memcpy((unsigned char *) & server.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
 	
-	my_socket=Socket(AF_INET, SOCK_DGRAM,0);
+	my_socket = Socket(AF_INET, SOCK_DGRAM, 0);
 	
-	bzero(&server, sizeof(server));
-	server.sin_family=AF_INET;
-	server.sin_port = htons(atoi(argv[1]));
+	// enable broadcast
+	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(on));
 	
-	// send broadcast message to servers
+	server.sin_family = AF_INET;
+	server.sin_port = htons(atoi(argv[2]));
+	server.sin_addr = *((struct in_addr *)hp->h_addr);
 	
-	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, 4);
-	// TODO figure out a more elegant solution to this problem.
-	inet_pton(AF_INET, "192.168.1.111", &server.sin_addr);
-	bytes = Sendto(my_socket, argv[2], strlen(argv[2])+1, 0, (struct sockaddr *) &server, sizeof(server));
-	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &off,4);
-	fromlen=sizeof(from);
-	bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
-	printf("Received from server: %s\n", buf);
-	
-	// time to test the connection
-	int x=0;
-	while(x<2000) {
-		bytes = Sendto(my_socket, buf, sizeof(buf), 0, (struct sockaddr *) &server, sizeof(server));
-		
-		bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
-		printf("Received from server: %s\n", buf);
-		x++;
-	}
-	
-	bytes = Sendto(my_socket, "quit", sizeof("quit"), 0, (struct sockaddr *) &server, sizeof(server));
-	close(my_socket);
+	bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	
+	printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
+	fromlen = sizeof(server);
+	bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
+	printf("Read from server: %s\n", buf);
+	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));	
+	Close(my_socket);
 }

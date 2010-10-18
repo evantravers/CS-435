@@ -17,8 +17,16 @@
 
 #include "Socket.h"
 #include "Bind.h"
+#include "Recvfrom.h"
+#include "Close.h"
+#include "Sendto.h"
 
 main(int argc, char *argv[]) {
+	if (argc != 2) {
+		printf("Usage: ./server <port> \n");
+		exit(0);
+	}
+	
 	struct sockaddr_in from, server;
 	struct hostent *hp;
 	int my_socket, bytes;
@@ -35,14 +43,14 @@ main(int argc, char *argv[]) {
 	
 	while(1) {
 		fromlen=sizeof(from);
-		bytes=recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
+		bytes=Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &from, &fromlen);
 		printf("SERVER: read %d bytes from IP %d (%s)\n", bytes, inet_ntoa(from.sin_addr), buf);
 		printf("Sending the data back...\n");
-		bytes=sendto(my_socket, buf, strlen(buf)+1, 0, (struct sockaddr *) &from, sizeof(from));
+		bytes=Sendto(my_socket, buf, strlen(buf)+1, 0, (struct sockaddr *) &from, sizeof(from));
 		if (!strcmp(buf, "quit")) {
 			// Should send quit to the client
 			break;
 		}
 	}
-	close(my_socket);
+	Close(my_socket);
 }

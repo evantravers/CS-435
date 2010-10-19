@@ -11,6 +11,8 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <signal.h>
+#include <setjmp.h>
 
 #include <sys/select.h>
 #include <sys/time.h>
@@ -24,6 +26,15 @@
 #include "Recvfrom.h"
 #include "Bind.h"
 
+#define RECV_TIMEOUT 2
+
+static sigjmp_buf recv_timed_out;
+
+void timeout_handler (int signum) {
+	signal(SIGALRM, SIG_DFL);
+	siglongjmp(recv_timed_out, 1);
+}
+
 main(int argc, char *argv[]) {
 	if (argc != 4) {
 		printf("Usage: ./client <subnet mask (i.e. 255.255.255.0)> <port> <message> \n");
@@ -34,11 +45,10 @@ main(int argc, char *argv[]) {
 	int my_socket, on=1, off=0;
 	struct hostent *hp;
 	struct sockaddr_in server;
-	char buf[512];
-	int bytes;
-	unsigned int fromlen;
 	struct sockaddr_in listofservers[30];
-	int server_count=0, more_servers=1;
+	char buf[512];
+	int bytes, scanning=1;
+	int more_servers=1, server_count=0, server_count_b=0, fromlen;
 
 	// initialize sockets	
 	hp = gethostbyname(argv[1]);
@@ -54,28 +64,66 @@ main(int argc, char *argv[]) {
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
 	server.sin_addr.s_addr|=htonl(0xff);
 	
-	// send the greeting
-	bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	
-	printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
-	
-	// TODO detect multiple servers, add them to array
-	while(more_servers==1) {
+	memset(&listofservers, 0, sizeof(listofservers));
+	while (scanning=1) {
+		// begin the server scan
+		server_count=0;
+		// send the greeting
+		bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	
+		// printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
 		
-		fromlen = sizeof(server);
-		bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
-		printf("Client: Found host at IP\t%s\nServer: %s\n", inet_ntoa(server.sin_addr), buf);
-		// add to the array
-		int i;
-		for (i=0; i < server_count; ++i) {
-			if (server.sin_addr.s_addr==listofservers[i].sin_addr.s_addr) {
+		// generate an arrary of IPs.
+		while(more_servers==1) {
+			fromlen = sizeof(server);
+			// this is to handle blocking on the recvfrom
+			signal(SIGALRM, timeout_handler);
+			alarm(RECV_TIMEOUT);
+			if (sigsetjmp(recv_timed_out, 1)) {
+				printf("Scanning...\n");
 				break;
 			}
+			bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
+			alarm(0);
+			signal(SIGALRM, SIG_DFL);
+
+			// printf("Client: Found host at IP\t%s\nServer: %s\n", inet_ntoa(server.sin_addr), buf);
+			// add to the array
+			listofservers[server_count]=server;
+			server_count++;
+		}			
+		
+		// if the number of servers you found this time is same as last, then stop looking
+		if (server_count==server_count_b) {
+			break;
 		}
-		listofservers[server_count++]=server;
-	}	
+		else {
+			server_count_b=server_count;
+		}
+	}
+	
+	printf("Servers found:\n");
+	if (server_count>0) {
+		int i;
+		for (i = 0; i < server_count; ++i) {
+			printf("Server %d: %s\n", i+1, inet_ntoa(listofservers[i].sin_addr));
+		}
+	}
+	else {
+		printf("None found!\n");
+	}
 	
 	// turn off broadcast
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));
+	
+	// talk to each server
+	int i;
+	for (i = 0; i < server_count; ++i) {
+		server = listofservers[i];
+		printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
+		bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));
+		bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
+		printf("Received message from Host #%d: %s\n", i, buf);
+	}
 	
 	Close(my_socket);
 }

@@ -1,6 +1,17 @@
 // CS-435
 // Evan Travers
 
+/*
+	Testing for packet loss:
+		I tested many different methods of ensuring packet loss, to different measures of success. The methods were server sleep, buffer sizes, and "packet" sizes.
+	Server sleep
+		The first thing I tested simulates massive network traffic or busy a processor on the server. The only way this will cause packet loss is when the timeout exceeds the client timeout, or if you add a sleep to the client that will stagger with the server, and occasionally timeout.
+	Buffer sizes
+		Buffer sizes are pretty obvious. If the server or client has its hands full of messages all ready, then potentially things can sit in the queue long enough to time out. Another method is to send very large messages back and forth, filling up a normally reasonably sized buffer.
+	Conclusions
+		The main difficulty with causing packet loss with the way my code is written is that the client only handles one connection and one packet at a time. It's very difficult to cause dropping under those circumstances. I suppose it might be possible if you forked off the client code that handles the servers, and handled them all at once, but as it stands it's nearly impossible, without skewing things horrifically as described above.
+*/
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -64,6 +75,7 @@ main(int argc, char *argv[]) {
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
 	server.sin_addr.s_addr|=htonl(0xff);
 	
+	// this creates an array of all the servers on the subnet
 	memset(&listofservers, 0, sizeof(listofservers));
 	while (scanning=1) {
 		// begin the server scan

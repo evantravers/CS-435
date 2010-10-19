@@ -36,8 +36,8 @@ void timeout_handler (int signum) {
 }
 
 main(int argc, char *argv[]) {
-	if (argc != 4) {
-		printf("Usage: ./client <subnet mask (i.e. 255.255.255.0)> <port> <message> \n");
+	if (argc != 3) {
+		printf("Usage: ./client <subnet mask (i.e. 255.255.255.0)> <port> \n");
 		exit(0);
 	}
 	
@@ -69,7 +69,8 @@ main(int argc, char *argv[]) {
 		// begin the server scan
 		server_count=0;
 		// send the greeting
-		bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));	
+		sprintf(buf, "ping");
+		bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));	
 		// printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
 		
 		// generate an arrary of IPs.
@@ -119,10 +120,26 @@ main(int argc, char *argv[]) {
 	int i;
 	for (i = 0; i < server_count; ++i) {
 		server = listofservers[i];
-		printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
-		bytes = Sendto(my_socket, argv[3], strlen(argv[3]), 0, (struct sockaddr *)&server, sizeof(server));
-		bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
-		printf("Received message from Host #%d: %s\n", i, buf);
+		int j;
+		for (j = 0; j < 4000; ++j) {
+			sprintf(buf, "%d", j);
+			printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
+			bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
+			signal(SIGALRM, timeout_handler);
+			alarm(RECV_TIMEOUT);
+			if (sigsetjmp(recv_timed_out, 1)) {
+				printf("ERROR on packet #%d\n:", j);
+				j=j-1;
+			}
+			bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
+			alarm(0);
+			signal(SIGALRM, SIG_DFL);
+			printf("Received message from Host #%d: %s\n", i, buf);
+			if (atoi(buf)!=j) {
+				printf("ERROR, packets out of order.\n");
+				break;
+			}
+		}
 	}
 	
 	Close(my_socket);

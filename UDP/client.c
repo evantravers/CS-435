@@ -3,13 +3,7 @@
 
 /*
 	Testing for packet loss:
-		I tested many different methods of ensuring packet loss, to different measures of success. The methods were server sleep, buffer sizes, and "packet" sizes.
-	Server sleep
-		The first thing I tested simulates massive network traffic or busy a processor on the server. The only way this will cause packet loss is when the timeout exceeds the client timeout, or if you add a sleep to the client that will stagger with the server, and occasionally timeout.
-	Buffer sizes
-		Buffer sizes are pretty obvious. If the server or client has its hands full of messages all ready, then potentially things can sit in the queue long enough to time out. Another method is to send very large messages back and forth, filling up a normally reasonably sized buffer.
-	Conclusions
-		The main difficulty with causing packet loss with the way my code is written is that the client only handles one connection and one packet at a time. It's very difficult to cause dropping under those circumstances. I suppose it might be possible if you forked off the client code that handles the servers, and handled them all at once, but as it stands it's nearly impossible, without skewing things horrifically as described above.
+		I discovered that the packet loss I experienced was in some way related to the speed that the client and the server went through their loops. If I increased the time that the server went through the loop, it dropped more packets. If I increased the time the client went through the loop, it decreased the number of lost packets as the server had more time to catch up.
 */
 
 #include <stdio.h>
@@ -133,8 +127,17 @@ main(int argc, char *argv[]) {
 	for (i = 0; i < server_count; ++i) {
 		server = listofservers[i];
 		int j;
-		for (j = 0; j < 4000; ++j) {
+		for (j = 0; j < 5000; ++j) {
 			sprintf(buf, "%d", j);
+			// printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
+			bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
+		}
+	}
+	for (i = 0; i < server_count; ++i) {
+		server = listofservers[i];
+		int j;
+		for (j = 0; j < 2000; ++j) {
+			sprintf(buf, "quit");
 			printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
 			bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
 		}

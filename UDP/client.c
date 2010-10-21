@@ -67,7 +67,7 @@ main(int argc, char *argv[]) {
 	server.sin_family = AF_INET;
 	server.sin_port = htons(atoi(argv[2]));
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
-	server.sin_addr.s_addr|=htonl(0xff);
+	server.sin_addr.s_addr|=htonl(0x1ff);
 	
 	// this creates an array of all the servers on the subnet
 	memset(&listofservers, 0, sizeof(listofservers));

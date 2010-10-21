@@ -56,13 +56,23 @@ main(int argc, char *argv[]) {
 	while(1) {
 		bzero(buf, sizeof(buf));
 		fromlen=sizeof(client);
-		bytes=Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &client, &fromlen);
-		printf("SERVER: read %d bytes from client: (%s)\n", bytes, buf);
-		printf("Sending the data back...\n");
-		bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
-		if (!strcmp(buf, "quit")) {
-			printf("Quitting!\n");
-			exit(0);
+		int counter=0,error=0;
+		double fako=0;
+		while (error==0) {
+			bytes=Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &client, &fromlen);
+			if (atoi(buf)!=counter) {
+				error=1;
+			}
+			sleep(0.2);
+			printf("SERVER: read %d bytes from client: (%s)\n", bytes, buf);
+			counter++;
+			
+			printf("Sending the data back...\n");
+			bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
+	   		if (!strcmp(buf, "quit")) {
+	   			printf("Quitting!\n");
+	   			exit(0);
+	   		}
 		}
 	}
 	Close(my_socket);

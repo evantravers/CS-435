@@ -137,20 +137,6 @@ main(int argc, char *argv[]) {
 			sprintf(buf, "%d", j);
 			printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
 			bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
-			signal(SIGALRM, timeout_handler);
-			alarm(RECV_TIMEOUT);
-			if (sigsetjmp(recv_timed_out, 1)) {
-				printf("ERROR on packet #%d\n:", j);
-				j=j-1;
-			}
-			bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
-			alarm(0);
-			signal(SIGALRM, SIG_DFL);
-			printf("Received message from Host #%d: %s\n", i, buf);
-			if (atoi(buf)!=j) {
-				printf("ERROR, packets out of order.\n");
-				break;
-			}
 		}
 	}
 	

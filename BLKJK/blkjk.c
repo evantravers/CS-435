@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 int getCard(int hand) {
 	unsigned int RN = random();
 	RN = (RN % 10)+1;
-	// handle the ace
+	// TODO handle the ace
 	if (RN==1) {
 		if ((hand+10)>21) {
 			return 1;
@@ -88,7 +88,7 @@ float stnd(int yourHand, int dealerHand, int iterations) {
 		}
 		cnt++;
 	}
-	return odds/iterations;
+	return (float)odds/iterations;
 }
 
 float dubl(int yourHand, int dealerHand, int iterations) {

@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 	}
 	else if (argc==5) {
 		// set random seed value.
-		srandomdev();
+		arc4random();
 	}
 	else {
 		printf("Params: (1) Your card, (2) Your card, (3) Dealer up, (4) number of iterations, (5) [optional] seed value\n");
@@ -39,11 +39,11 @@ int main(int argc, char *argv[]) {
 
 	// time to compute
 	printf("Calculating stand...\n");
-	float stand = (float)stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
+	double stand = (double)stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
 	printf("Calculating double...\n");
-	float dbl = (float)dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
+	double dbl = (double)dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
 	printf("Calculating hit...\n");
-	float hit = (float)hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
+	double hit = (double)hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD)/iterations;
 	printf("Stand odds:\t%f\n", stand);
 	printf("Double odds:\t%f\n", dbl);
 	printf("Hit odds:\t%f\n", hit);
@@ -75,7 +75,7 @@ int stnd(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlag
 		// you sit here
 		
 		// dealer hits until 17
-		while (optHand(dHand,aFlagD)<17) {
+		while (optHand(dHand, aFlagD)<17) {
 			int newCard=getCard();
 			if (newCard==1) {
 				aFlagD=1;
@@ -151,6 +151,7 @@ int dubl(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlag
 int hitd(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
 	static int odds = 0, dHand=0, yHand=0, aFlagY=0, aFlagD=0, cnt=0;
 	while (cnt < iterations) {
+		int newCard;
 		// what is on the table?
 		yHand = yourHand;
 		dHand = dealerHand;
@@ -158,40 +159,43 @@ int hitd(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlag
 		// are either you or the dealer holding an ace?
 		aFlagD = aceFlagD;
 		aFlagY = aceFlagY;
+		hit:
+		// I hit it
+		newCard = getCard();
+		if (newCard==1) {
+			aFlagY=1;
+		}
+		yHand=yHand+newCard;
 		
-		while (1) {
-			// you hit once
-			int newCard = getCard();
-			if (newCard==1) {
-				aFlagY=1;
-			}
-			yHand=yHand+newCard;
-
-			if (optHand(yHand, aFlagY)>21) {
-				odds--;
-				break;
-			}
-			
+		// did you bust?
+		if (optHand(yHand, aFlagY)>21) {
+			odds--;
+		}
+		else {
 			// dealer hits until 17
-			while (optHand(dHand, aFlagD)<17) {
-				int newCard=getCard();
+			while (optHand(dHand,aFlagD)<17) {
+				newCard=getCard();
 				if (newCard==1) {
 					aFlagD=1;
 				}
 				dHand=dHand+newCard;
 			}
 			
+			// final positions
 			int dHandF = optHand(dHand,aFlagD);
 			int yHandF = optHand(yHand,aFlagY);
 			
-			if (dHandF!=yHandF) {
-				if ((yHandF>dHandF)&&(yHandF<22)||(yHandF<22)&&(dHandF>21)) {
-					odds++;
-					break;
+			// if you win
+			if (yHandF>dHandF||dHandF>21) {
+				odds++;
+			}
+			else {
+				// if you are over your limit
+				if (yHandF>16) {
+					odds--;
 				}
 				else {
-					odds--;
-					break;
+					goto hit;
 				}
 			}
 		}

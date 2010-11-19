@@ -9,6 +9,7 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <math.h>
 
 #include <sys/select.h>
 #include <sys/time.h>
@@ -21,11 +22,16 @@
 #include "Close.h"
 #include "Sendto.h"
 
-// basic UDP client, returns everything it is sent until is sent a 'quit' message
+// basic UDP client, returns everything it is sent until is sent a 'quit' message, modified to play a ton of blackjack hands
+
+int getCard();
+int stnd(int, int, int, int, int);
+int dubl(int, int, int, int, int);
+int hitd(int, int, int, int, int);
 
 main(int argc, char *argv[]) {
 	if (argc != 2) {
-		printf("Usage: ./client <port> \n");
+		printf("Usage: ./server <port> \n");
 		exit(0);
 	}
 	
@@ -47,19 +53,194 @@ main(int argc, char *argv[]) {
 		fromlen=sizeof(client);
 		bytes=Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &client, &fromlen);
 		// detect type of transmission
-		
-		// if it's ping, ping back
-		
-		// otherwise, parse the input, run blackjack
-		
-		// return the values
-		printf("SERVER: read %d bytes from client: (%s)\n", bytes, buf);
-		printf("Sending the data back...\n");
-		bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
 		if (!strcmp(buf, "quit")) {
 			printf("Quitting!\n");
 			exit(0);
 		}
+		
+		// if it's ping, ping back
+		if (strcmp(buf, "ping")==0) {
+			printf("Sending the data back...\n");
+			bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
+		}
+		// otherwise, parse the input, run blackjack
+		
+		// return the odds back to the client
 	}
 	Close(my_socket);
+}
+
+char* play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+	// todo read the input
+
+	int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+	int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+	int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+	
+	char* results;
+	sprintf(results, "%dx%dx%d", stand, dbl, hit);
+	// TODO format the output for the send
+	return results;
+}
+
+int getCard() {
+	unsigned int RN = random();
+	RN = (RN % 13)+1;
+	if (RN > 9) {
+		RN = 10;
+	}
+	return RN;
+}
+
+int stnd(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+	int odds = 0, cnt = 0, dHand=0, yHand=0, aFlagY=0, aFlagD=0;
+	while (cnt < iterations) {
+		// what is on the table?
+		yHand = yourHand;
+		dHand = dealerHand;
+		
+		// are either you or the dealer holding an ace?
+		aFlagD=aceFlagD;
+		aFlagY=aceFlagY;
+		
+		// your turn
+		// you sit here
+		
+		// dealer hits until 17
+		while (optHand(dHand, aFlagD)<17) {
+			int newCard=getCard();
+			if (newCard==1) {
+				aFlagD=1;
+			}
+			dHand=dHand+newCard;
+		}
+
+		// final positions
+		int dHandF = optHand(dHand,aFlagD);
+		int yHandF = optHand(yHand,aFlagY);
+		
+		// if your hands are not the same (tie)
+		if (dHandF!=yHandF) {
+			if ((yHandF>dHandF)&&(yHandF<22)||(yHandF<22)&&(dHandF>21)) {
+				odds++;
+			}
+			else {
+				odds--;
+			}
+		}
+		cnt++;
+	}
+	return odds;
+}
+
+int dubl(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+	int odds = 0, cnt = 0, dHand, yHand, aFlagY, aFlagD;
+	while (cnt < iterations) {
+		// what is on the table?
+		yHand = yourHand;
+		dHand = dealerHand;
+		
+		// are either you or the dealer holding an ace?
+		aFlagD=aceFlagD;
+		aFlagY=aceFlagY;
+		
+		// your turn
+		// you hit once
+		int newCard = getCard();
+		if (newCard==1) {
+			aFlagY=1;
+		}
+		yHand=yHand+newCard;
+		// you sit here
+		
+		// dealer hits until 17
+		while (optHand(dHand,aFlagD)<17) {
+			int newCard=getCard();
+			if (newCard==1) {
+				aFlagD=1;
+			}
+			dHand=dHand+newCard;
+		}
+		
+		// final positions
+		int dHandF = optHand(dHand,aFlagD);
+		int yHandF = optHand(yHand,aFlagY);
+		
+		// if your hands are not the same (tie)
+		if (dHandF!=yHandF) {
+			if ((yHandF>dHandF)&&(yHandF<22)||(yHandF<22)&&(dHandF>21)) {
+				odds=odds+2;
+			}
+			else {
+				odds=odds-2;
+			}
+		}
+		cnt++;
+	}
+	return odds;
+}
+
+int hitd(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+	static int odds = 0, dHand=0, yHand=0, aFlagY=0, aFlagD=0, cnt=0;
+	while (cnt < iterations) {
+		int newCard;
+		// what is on the table?
+		yHand = yourHand;
+		dHand = dealerHand;
+		
+		// are either you or the dealer holding an ace?
+		aFlagD = aceFlagD;
+		aFlagY = aceFlagY;
+		hit:
+		// I hit it
+		newCard = getCard();
+		if (newCard==1) {
+			aFlagY=1;
+		}
+		yHand=yHand+newCard;
+		
+		// did you bust?
+		if (optHand(yHand, aFlagY)>21) {
+			odds--;
+		}
+		else {
+			// dealer hits until 17
+			while (optHand(dHand,aFlagD)<17) {
+				newCard=getCard();
+				if (newCard==1) {
+					aFlagD=1;
+				}
+				dHand=dHand+newCard;
+			}
+			
+			// final positions
+			int dHandF = optHand(dHand,aFlagD);
+			int yHandF = optHand(yHand,aFlagY);
+			
+			// if you win
+			if (yHandF>dHandF||dHandF>21) {
+				odds++;
+			}
+			else {
+				// if you are over your limit
+				if (yHandF>16) {
+					odds--;
+				}
+				else {
+					goto hit;
+				}
+			}
+		}
+		cnt++;
+	}
+	return odds;
+}
+// optimizes the hand, deals with the ace
+int optHand(int sum, int flag) {
+	if (flag==1&&((sum+10)<22)) {
+		return sum+10;
+	}
+	else {
+		return sum;
+	}
 }

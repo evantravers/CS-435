@@ -63,16 +63,14 @@ main(int argc, char *argv[]) {
 	server.sin_family = AF_INET;
 	server.sin_port = htons(atoi(argv[2]));
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
-	printf("%s\n", inet_ntoa(server.sin_addr));
 	server.sin_addr.s_addr|=htonl(0x1ff);
-	printf("%s\n", inet_ntoa(server.sin_addr));
 	// this creates an array of all the servers on the subnet
 	memset(&listofservers, 0, sizeof(listofservers));
 	while (scanning=1) {
 		// begin the server scan
 		server_count=0;
 		// send the greeting
-		sprintf(buf, "ping");
+		sprintf(buf, "ping",0);
 		bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));	
 		// printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
 		
@@ -121,30 +119,15 @@ main(int argc, char *argv[]) {
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));
 	
 	// talk to each server
+	// send out an equal amount of work for each one.
 	int i;
 	for (i = 0; i < server_count; ++i) {
 		server = listofservers[i];
-		int j;
-		for (j = 0; j < 4000; ++j) {
-			sprintf(buf, "%d", j);
-			printf("Sending \"%s\" to %s\n", buf, inet_ntoa(server.sin_addr));
-			bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
-			signal(SIGALRM, timeout_handler);
-			alarm(RECV_TIMEOUT);
-			if (sigsetjmp(recv_timed_out, 1)) {
-				printf("ERROR on packet #%d\n:", j);
-				j=j-1;
-			}
-			bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
-			alarm(0);
-			signal(SIGALRM, SIG_DFL);
-			printf("Received message from Host #%d: %s\n", i, buf);
-			if (atoi(buf)!=j) {
-				printf("ERROR, packets out of order.\n");
-				break;
-			}
-		}
 	}
+	
+	// get results
+	
+	// compute and return
 	
 	Close(my_socket);
 }

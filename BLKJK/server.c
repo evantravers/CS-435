@@ -28,6 +28,7 @@ int getCard();
 int stnd(int, int, int, int, int);
 int dubl(int, int, int, int, int);
 int hitd(int, int, int, int, int);
+char *play(int, int, int, int, int);
 
 main(int argc, char *argv[]) {
 	if (argc != 2) {
@@ -57,28 +58,48 @@ main(int argc, char *argv[]) {
 			printf("Quitting!\n");
 			exit(0);
 		}
-		
+		printf("Received this buf: %s\n", buf);
 		// if it's ping, ping back
 		if (strcmp(buf, "ping")==0) {
-			printf("Sending the data back...\n");
+			printf("Sending the ping back...\n");
 			bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
 		}
-		// otherwise, parse the input, run blackjack
+		else {
+			// otherwise, parse the input, run blackjack
+			int yHand1=atoi(strtok(buf, " ,\n"));
+			
+			int yHand2=atoi(strtok(NULL, " ,\n"));
+			int dealerHand=atoi(strtok(NULL, " ,\n"));
+			int iterations=atoi(strtok(NULL, " ,\n"));
+			int aceFlagY=0, aceFlagD=0;
+			int yourHand = yHand1 + yHand2;
+			printf("This is what we just read: %d %d %d %d\n", yHand1, yHand2, dealerHand, iterations);
+			if (yHand1==1||yHand2==1) {
+				aceFlagY=1;
+			}
+			if (dealerHand==1) {
+				aceFlagD=1;
+			}
+			
+			play(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+		}
 		
 		// return the odds back to the client
 	}
+	
+	// send results string back
 	Close(my_socket);
 }
 
 char* play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
-	// todo read the input
 
 	int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	
 	char* results;
-	sprintf(results, "%dx%dx%d", stand, dbl, hit);
+	sprintf(results, "%d %d %d", stand, dbl, hit);
+	printf("these are the results: %s\n", results);
 	// TODO format the output for the send
 	return results;
 }

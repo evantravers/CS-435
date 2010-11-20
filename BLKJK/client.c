@@ -49,8 +49,8 @@ main(int argc, char *argv[]) {
 	char buf[512];
 	int bytes, scanning=1;
 	int more_servers=1, server_count=0, server_count_b=0, fromlen;
-
-	// TODO make this use the IP not 255.255.255.0
+	int stand_odds=0, double_odds=0, hit_odds=0;
+	
 	// initialize sockets	
 	hp = gethostbyname(argv[1]);
 	memcpy((unsigned char *) & server.sin_addr, (unsigned char *) hp->h_addr, hp->h_length);
@@ -113,21 +113,41 @@ main(int argc, char *argv[]) {
 	}
 	else {
 		printf("None found!\n");
+		exit(0);
 	}
 	
+	// set up the string to be sent to each client
+	int iterations = atoi(argv[6]);
+	iterations=iterations/server_count;
+	sprintf(buf, "%s %s %s %d", argv[3], argv[4], argv[5], iterations);
 	// turn off broadcast
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));
 	
 	// talk to each server
 	// send out an equal amount of work for each one.
 	int i;
-	for (i = 0; i < server_count; ++i) {
+	for (i = 0; i < server_count; i++) {
 		server = listofservers[i];
+		// send to each server a proper number of items to work on
+		// send yHand1 yHand2 dHand iterations/server_count;
+		// TODO remove this sprintf
+		sprintf(buf, "quit");
+		bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
 	}
 	
 	// get results
-	
+	for (i = 0; i < server_count; ++i) {
+		// listen for each one
+		
+		// stand_odds=+atoi(strtok(buf, " ,\n"));
+		// double_odds=+atoi(strtok(NULL, " ,\n"));
+		// hit_odds=+atoi(strtok(NULL, " ,\n"));
+	}
 	// compute and return
+	
+	// double stand = (double)stand_odds/iterations;
+	// double duble = (double)double_odds/iterations;
+	// double hitd  = (double)hit_odds/iterations;
 	
 	Close(my_socket);
 }

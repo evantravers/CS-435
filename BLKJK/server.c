@@ -28,7 +28,7 @@ int getCard();
 int stnd(int, int, int, int, int);
 int dubl(int, int, int, int, int);
 int hitd(int, int, int, int, int);
-void play(int, int, int, int, int);
+char* play(int, int, int, int, int);
 
 main(int argc, char *argv[]) {
 	if (argc != 2) {
@@ -82,15 +82,13 @@ main(int argc, char *argv[]) {
 				aceFlagD=1;
 			}
 			printf("This is what we just read: %d %d %d %d %d\n", yourHand, dealerHand, aceFlagY, aceFlagD, iterations);
-			// play(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 			
-			// int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-			// int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-			// int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-			// 
-			// // char* results;
-			// // 	sprintf(results, "%d %d %d", stand, dbl, hit);
-			// printf("%d %d %d", stand, dbl, hit);
+			int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			sprintf(buf, "%d %d %d\n", stand, dbl, hit);
+			
+			bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
 		}
 		
 		// return the odds back to the client
@@ -101,17 +99,17 @@ main(int argc, char *argv[]) {
 	exit(0);
 }
 
-void play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+char* play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
 
 	int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-	
 	// char* results;
 	// 	sprintf(results, "%d %d %d", stand, dbl, hit);
-	printf("%d %d %d", stand, dbl, hit);
+	char* results;
+	sprintf(results, "%d %d %d\n", stand, dbl, hit);
 	// TODO format the output for the send
-	// return results;
+	return results;
 }
 
 int getCard() {

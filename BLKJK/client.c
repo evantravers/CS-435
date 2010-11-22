@@ -151,9 +151,12 @@ main(int argc, char *argv[]) {
 	}
 	// compute and return
 	
-	// double stand = (double)stand_odds/iterations;
-	// double duble = (double)double_odds/iterations;
-	// double hitd  = (double)hit_odds/iterations;
+	double stand = (double)stand_odds/iterations;
+	double duble = (double)double_odds/iterations;
+	double hitd  = (double)hit_odds/iterations;
 	
+	printf("==== THE ODDS ==== \nStand:\t%f\nDouble:\t%f\nHit:\t%f\n", stand, duble, hitd);
 	Close(my_socket);
+	
+	exit(0);
 }

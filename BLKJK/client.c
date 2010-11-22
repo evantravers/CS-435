@@ -47,8 +47,8 @@ main(int argc, char *argv[]) {
 	struct sockaddr_in server;
 	struct sockaddr_in listofservers[30];
 	char buf[512];
-	int bytes, scanning=1;
-	int more_servers=1, server_count=0, server_count_b=0, fromlen;
+	int bytes;
+	int server_count=0, server_count_b=99, fromlen;
 	int stand_odds=0, double_odds=0, hit_odds=0;
 	
 	// initialize sockets	
@@ -64,9 +64,12 @@ main(int argc, char *argv[]) {
 	server.sin_port = htons(atoi(argv[2]));
 	server.sin_addr = *((struct in_addr *)hp->h_addr);
 	server.sin_addr.s_addr|=htonl(0x1ff);
+	
+	// TODO account for possible packet loss somewhere in here.
 	// this creates an array of all the servers on the subnet
 	memset(&listofservers, 0, sizeof(listofservers));
-	while (scanning=1) {
+	while (1) {
+		printf("Scanning...\n");
 		// begin the server scan
 		server_count=0;
 		// send the greeting
@@ -75,13 +78,12 @@ main(int argc, char *argv[]) {
 		// printf("sent %d bytes to %s\n", bytes, inet_ntoa(server.sin_addr));
 		
 		// generate an arrary of IPs.
-		while(more_servers==1) {
+		while(1) {
 			fromlen = sizeof(server);
 			// this is to handle blocking on the recvfrom
 			signal(SIGALRM, timeout_handler);
 			alarm(RECV_TIMEOUT);
 			if (sigsetjmp(recv_timed_out, 1)) {
-				printf("Scanning...\n");
 				break;
 			}
 			bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
@@ -93,13 +95,15 @@ main(int argc, char *argv[]) {
 			listofservers[server_count]=server;
 			server_count++;
 		}			
-		
+		break;
 		// if the number of servers you found this time is same as last, then stop looking
 		if (server_count==server_count_b) {
 			break;
 		}
 		else {
-			server_count_b=server_count;
+			if (server_count>server_count_b) {
+				server_count_b=server_count;	
+			}
 		}
 	}
 	
@@ -130,18 +134,20 @@ main(int argc, char *argv[]) {
 		server = listofservers[i];
 		// send to each server a proper number of items to work on
 		// send yHand1 yHand2 dHand iterations/server_count;
-		// TODO remove this sprintf
-		sprintf(buf, "quit");
 		bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
 	}
 	
+	// TODO account for timeouts
 	// get results
 	for (i = 0; i < server_count; ++i) {
 		// listen for each one
+		bytes = Recvfrom(my_socket, buf, 512, 0, (struct sockaddr *) &server, &fromlen);
 		
-		// stand_odds=+atoi(strtok(buf, " ,\n"));
-		// double_odds=+atoi(strtok(NULL, " ,\n"));
-		// hit_odds=+atoi(strtok(NULL, " ,\n"));
+		stand_odds=+atoi(strtok(buf, " ,\n"));
+		double_odds=+atoi(strtok(NULL, " ,\n"));
+		hit_odds=+atoi(strtok(NULL, " ,\n"));
+		sprintf(buf, "quit");
+		bytes = Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *)&server, sizeof(server));
 	}
 	// compute and return
 	

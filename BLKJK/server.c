@@ -28,7 +28,7 @@ int getCard();
 int stnd(int, int, int, int, int);
 int dubl(int, int, int, int, int);
 int hitd(int, int, int, int, int);
-char *play(int, int, int, int, int);
+void play(int, int, int, int, int);
 
 main(int argc, char *argv[]) {
 	if (argc != 2) {
@@ -42,7 +42,7 @@ main(int argc, char *argv[]) {
 	char buf[512];
 	unsigned int fromlen;
 
-	my_socket=Socket(AF_INET, SOCK_DGRAM,0);
+	my_socket=Socket(AF_INET, SOCK_DGRAM, 0);
 	client.sin_family=AF_INET;
 	client.sin_addr.s_addr=htonl(INADDR_ANY);
 	client.sin_port=htons(atoi(argv[1]));
@@ -65,6 +65,7 @@ main(int argc, char *argv[]) {
 			bytes=Sendto(my_socket, buf, strlen(buf), 0, (struct sockaddr *) &client, sizeof(client));
 		}
 		else {
+			printf("No longer pinging now!\n");
 			// otherwise, parse the input, run blackjack
 			int yHand1=atoi(strtok(buf, " ,\n"));
 			
@@ -73,15 +74,23 @@ main(int argc, char *argv[]) {
 			int iterations=atoi(strtok(NULL, " ,\n"));
 			int aceFlagY=0, aceFlagD=0;
 			int yourHand = yHand1 + yHand2;
-			printf("This is what we just read: %d %d %d %d\n", yHand1, yHand2, dealerHand, iterations);
+			
 			if (yHand1==1||yHand2==1) {
 				aceFlagY=1;
 			}
 			if (dealerHand==1) {
 				aceFlagD=1;
 			}
+			printf("This is what we just read: %d %d %d %d %d\n", yourHand, dealerHand, aceFlagY, aceFlagD, iterations);
+			// play(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 			
-			play(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			// int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			// int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			// int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
+			// 
+			// // char* results;
+			// // 	sprintf(results, "%d %d %d", stand, dbl, hit);
+			// printf("%d %d %d", stand, dbl, hit);
 		}
 		
 		// return the odds back to the client
@@ -89,19 +98,20 @@ main(int argc, char *argv[]) {
 	
 	// send results string back
 	Close(my_socket);
+	exit(0);
 }
 
-char* play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
+void play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
 
 	int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 	
-	char* results;
-	sprintf(results, "%d %d %d", stand, dbl, hit);
-	printf("these are the results: %s\n", results);
+	// char* results;
+	// 	sprintf(results, "%d %d %d", stand, dbl, hit);
+	printf("%d %d %d", stand, dbl, hit);
 	// TODO format the output for the send
-	return results;
+	// return results;
 }
 
 int getCard() {

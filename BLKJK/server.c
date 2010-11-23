@@ -21,6 +21,7 @@
 #include "Recvfrom.h"
 #include "Close.h"
 #include "Sendto.h"
+#include "random32.c"
 
 // basic UDP client, returns everything it is sent until is sent a 'quit' message, modified to play a ton of blackjack hands
 
@@ -35,7 +36,7 @@ main(int argc, char *argv[]) {
 		printf("Usage: ./server <port> \n");
 		exit(0);
 	}
-	
+  	srandom(Random32());	
 	struct sockaddr_in client;
 	struct hostent *hp;
 	int my_socket, bytes;
@@ -97,19 +98,6 @@ main(int argc, char *argv[]) {
 	// send results string back
 	Close(my_socket);
 	exit(0);
-}
-
-char* play(int yourHand, int dealerHand, int iterations, int aceFlagY, int aceFlagD) {
-
-	int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-	int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-	int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
-	// char* results;
-	// 	sprintf(results, "%d %d %d", stand, dbl, hit);
-	char* results;
-	sprintf(results, "%d %d %d\n", stand, dbl, hit);
-	// TODO format the output for the send
-	return results;
 }
 
 int getCard() {

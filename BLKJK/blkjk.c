@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "random32.c"
 
 int getCard();
 int stnd(int, int, int, int, int);
@@ -18,7 +19,7 @@ int main(int argc, char *argv[]) {
 	}
 	else if (argc==5) {
 		// set random seed value.
-		arc4random();
+	  srandom(Random32());
 	}
 	else {
 		printf("Params: (1) Your card, (2) Your card, (3) Dealer up, (4) number of iterations, (5) [optional] seed value\n");
@@ -47,8 +48,7 @@ int main(int argc, char *argv[]) {
 	printf("Stand odds:\t%f\n", stand);
 	printf("Double odds:\t%f\n", dbl);
 	printf("Hit odds:\t%f\n", hit);
-	
-	// TODO return the one that has the best winning ratio
+
 }
 
 int getCard() {

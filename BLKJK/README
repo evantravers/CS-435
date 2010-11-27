@@ -1,10 +1,1 @@
-This is an implementation of the Mersenne Twist pseudorandom number
-generator, including both C and C++ interfaces and a set of functions
-for generating random variates from common distributions.
-
-The full documentation for the package is in the manual pages,
-mtwist.3 and randistrs.3.
-
-For more information, see the Web page for the package, at:
-
-	http://www.cs.hmc.edu/~geoff/mtwist.html
+This is a simple monte carlo simulator for blackjack odds given certain hands. blkjk.c is a stand-alone one computer program, and server.c and client.c allow for multiple computers to share the load of very large numbers of hands.

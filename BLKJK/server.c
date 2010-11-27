@@ -1,5 +1,6 @@
 // CS-435
 // Evan Travers
+// server
 
 #include <stdio.h>
 #include <string.h>

@@ -1,1 +1,2 @@
 This is a simple monte carlo simulator for blackjack odds given certain hands. blkjk.c is a stand-alone one computer program, and server.c and client.c allow for multiple computers to share the load of very large numbers of hands.
+

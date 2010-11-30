@@ -36,8 +36,7 @@ main(int argc, char *argv[]) {
 	if (argc != 2) {
 		printf("Usage: ./server <port> \n");
 		exit(0);
-	}
-  	srandom(Random32());	
+	}	
 	struct sockaddr_in client;
 	struct hostent *hp;
 	int my_socket, bytes;
@@ -74,6 +73,7 @@ main(int argc, char *argv[]) {
 			int yHand2=atoi(strtok(NULL, " ,\n"));
 			int dealerHand=atoi(strtok(NULL, " ,\n"));
 			int iterations=atoi(strtok(NULL, " ,\n"));
+			int seed=atoi(strtok(NULL, " ,\n"));
 			int aceFlagY=0, aceFlagD=0;
 			int yourHand = yHand1 + yHand2;
 			
@@ -83,8 +83,9 @@ main(int argc, char *argv[]) {
 			if (dealerHand==1) {
 				aceFlagD=1;
 			}
-			printf("This is what we just read: %d %d %d %d %d\n", yourHand, dealerHand, aceFlagY, aceFlagD, iterations);
+			printf("This is what we just read: %d %d %d %d %d %d\n", yourHand, dealerHand, aceFlagY, aceFlagD, iterations, seed);
 			
+			srandom(seed);
 			int stand = stnd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 			int dbl = dubl(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);
 			int hit = hitd(yourHand, dealerHand, iterations, aceFlagY, aceFlagD);

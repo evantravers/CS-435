@@ -124,7 +124,7 @@ main(int argc, char *argv[]) {
 	// set up the string to be sent to each client
 	int iterations = atoi(argv[6]);
 	iterations=iterations/server_count;
-	sprintf(buf, "%s %s %s %d", argv[3], argv[4], argv[5], iterations);
+	
 	// turn off broadcast
 	Setsockopt(my_socket, SOL_SOCKET, SO_BROADCAST, &on, sizeof(off));
 	
@@ -132,6 +132,8 @@ main(int argc, char *argv[]) {
 	// send out an equal amount of work for each one.
 	int i;
 	for (i = 0; i < server_count; i++) {
+		int seed = random();
+		sprintf(buf, "%s %s %s %d %d", argv[3], argv[4], argv[5], iterations, seed);
 		server = listofservers[i];
 		// send to each server a proper number of items to work on
 		// send yHand1 yHand2 dHand iterations/server_count;

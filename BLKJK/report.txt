@@ -1,0 +1,43 @@
+Blackjack
+
+    I began by implementing the blackjack program, and ensuring that the odds matched the odds from the Wizard's site to a reasonable degree of accuracy. I then began implementing my server and client programs. I used UDP for all the network code, because I wanted to use the broadcast functionality to detect the running servers, and because I had over engineered my original UDP project and had the code to detect multiple servers and send and receive from them. 
+
+    The order of operations is this: I launch any number of servers on multiple computers. The client takes it's own IP, a port number, the player's two cards, the dealer's card, and the number of desired iterations. The client also generates a seed for the PRNG in the server. It sends out the broadcast, and adds the the IP for each server it finds to an array. It then goes through the array in order, sends the string containing the instructions to each server, (taking the number of hands to play and dividing it by the number of servers found), and then waits for the server's response. The server simply reads the input, runs the program, and sends the data back to the client. The client then computes the total odds, sends a quit message to all the servers, and prints out the totals for the user.
+    
+    My program handles all hands I have tested with quite accurate results. It handles aces properly, and gets stand and double to 3 or 4 digits easily, and hit to 2 digits normally. I tested it rather thoroughly for accuracy, and this is what I found:
+
+Player Hand Dealer Up Card  Wizard Odds (S/D/H) My Odds
+=================================================================
+1 9         3               Stand:       0.6503      0.650199
+                            Double:      0.4093      0.409338
+                            Hit:         0.2061      0.218499
+-----------------------------------------------------------------
+7 6         9               Stand:      -0.5431     -0.543247
+                            Double:     -0.8078     -0.767588
+                            Hit:        -0.3872     -0.399580
+-----------------------------------------------------------------
+4 4         3               Stand:      -0.2523     -0.252120
+                            Double:     -0.1362     -0.136226
+                            Hit:         0.008       0.038240
+
+    The network code also behaved as I expected. The speedup was around the values I expected.
+
+Input       # of servers:
+===========================
+1 9 3 640m  1) 7m45.488s        
+            2) 3m53.413s
+            4) 1m57.866s
+
+7 6 9 640m  1) 4m59.945s
+            2) 2m31.036s
+            4) 1m16.613s
+
+4 4 3 640m  1) 7m39.086s
+            2) 3m50.516s
+            4) 1m56.404s
+
+    In each instance, doubling the number of servers roughly halves the time it takes to run the calculation.
+
+    I was pretty pleased with my program. It not only got reasonably accurate results, but it also achieved a very measurable and consistent speedup when deployed on multiple computers.
+
+* all of the stats are in the data.txt file also attached to this document.

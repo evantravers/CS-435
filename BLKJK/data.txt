@@ -1,0 +1,149 @@
+Wizard Odds for 1 9 3:
+Stand: 	0.6503
+Double: 0.4093
+Hit:	0.2061
+
+-bash-3.2$ time ./client 138.26.64.188 10201 1 9 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.190
+==== THE ODDS ==== 
+Stand:	0.650264
+Double:	0.409383
+Hit:	0.218581
+
+real	7m45.488s
+user	0m0.000s
+sys	0m0.005s
+
+-bash-3.2$ time ./client 138.26.64.188 10201 1 9 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.190
+Server 2: 138.26.64.191
+==== THE ODDS ==== 
+Stand:	0.650270
+Double:	0.409566
+Hit:	0.218622
+
+real	3m53.413s
+user	0m0.000s
+sys	0m0.004s
+
+-bash-3.2$ time ./client 138.26.64.188 10201 1 9 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.190
+Server 2: 138.26.64.191
+Server 3: 138.26.64.192
+Server 4: 138.26.64.186
+==== THE ODDS ==== 
+Stand:	0.650199
+Double:	0.409338
+Hit:	0.218499
+
+real	1m57.866s
+user	0m0.000s
+sys	0m0.005s
+
+============================================
+
+Wizard Odds for 7 6 9:
+Stand:	-0.5431
+Double: -0.8078
+Hit:	-0.3872
+
+-bash-3.2$ time ./client 138.26.64.188 10201 7 6 9 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.190
+==== THE ODDS ==== 
+Stand:	-0.543163
+Double:	-0.767533
+Hit:	-0.399596
+
+real	4m59.945s
+user	0m0.001s
+sys	0m0.004s
+
+-bash-3.2$ time ./client 138.26.64.188 10201 7 6 9 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.191
+Server 2: 138.26.64.190
+==== THE ODDS ==== 
+Stand:	-0.543208
+Double:	-0.767503
+Hit:	-0.399578
+
+real	2m31.036s
+user	0m0.001s
+sys	0m0.002s
+
+-bash-3.2$ time ./client 138.26.64.188 10201 7 6 9 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.186
+Server 2: 138.26.64.191
+Server 3: 138.26.64.190
+Server 4: 138.26.64.192
+==== THE ODDS ==== 
+Stand:	-0.543247
+Double:	-0.767588
+Hit:	-0.399580
+
+real	1m16.613s
+user	0m0.001s
+sys	0m0.002s
+
+============================================
+
+Wizard Odds for 4 4 3:
+Stand:	-0.2523
+Double: -0.1362
+Hit:	0.008
+
+-bash-3.2$ time ./client 138.26.64.188 10201 4 4 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.190
+==== THE ODDS ==== 
+Stand:	-0.252317
+Double:	-0.136163
+Hit:	0.038352
+
+real	7m39.086s
+user	0m0.001s
+sys	0m0.003s
+
+
+-bash-3.2$ time ./client 138.26.64.188 10201 4 4 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.191
+Server 2: 138.26.64.190
+==== THE ODDS ==== 
+Stand:	-0.252151
+Double:	-0.136020
+Hit:	0.038314
+
+real	3m50.516s
+user	0m0.000s
+sys	0m0.005s
+
+
+-bash-3.2$ time ./client 138.26.64.188 10201 4 4 3 640000000
+Scanning...
+Servers found:
+Server 1: 138.26.64.186
+Server 2: 138.26.64.192
+Server 3: 138.26.64.190
+Server 4: 138.26.64.191
+==== THE ODDS ==== 
+Stand:	-0.252120
+Double:	-0.136226
+Hit:	0.038240
+
+real	1m56.404s
+user	0m0.002s
+sys	0m0.001s

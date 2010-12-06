@@ -121,7 +121,6 @@ main(int argc, char *argv[]) {
 		exit(0);
 	}
 	
-	// set up the string to be sent to each client
 	int iterations = atoi(argv[6]);
 	iterations=iterations/server_count;
 	
@@ -133,6 +132,7 @@ main(int argc, char *argv[]) {
 	int i;
 	for (i = 0; i < server_count; i++) {
 		int seed = random();
+		// set up the string to be sent to each client
 		sprintf(buf, "%s %s %s %d %d", argv[3], argv[4], argv[5], iterations, seed);
 		server = listofservers[i];
 		// send to each server a proper number of items to work on
